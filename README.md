@@ -10,6 +10,7 @@ Projeto da disciplina dividido em duas frentes:
 ## Escopo
 - Escopo consolidado: `docs/escopo_projeto.md`
 - Parte teórica (artefatos):
+  - `docs/parte_teorica/01_diagrama_arquitetura.md`
   - `docs/parte_teorica/02_casos_de_uso.md`
   - `docs/parte_teorica/03_tecnologias_justificativas.md`
   - `docs/parte_teorica/04_ml_monitoramento_spof.md`
