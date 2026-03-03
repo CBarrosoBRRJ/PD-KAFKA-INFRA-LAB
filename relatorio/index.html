@@ -1,0 +1,318 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Relatório Final - PD-KAFKA-INFRA-LAB</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="cover">
+      <h1>Relatório Final - PD-KAFKA-INFRA-LAB</h1>
+      <p class="subtitle">Projeto de Disciplina: Infraestrutura Kafka (Parte Teórica + Parte Prática)</p>
+      <div class="meta">
+        <div><strong>Aluno:</strong> Caio Barroso</div>
+        <div><strong>Professor:</strong> Ricardo Paiva</div>
+        <div><strong>Matéria:</strong> Infraestrutura Kafka</div>
+        <div><strong>Período:</strong> Março/2026</div>
+        <div><strong>GitHub:</strong> <a href="https://github.com/CBarrosoBRRJ/PD-KAFKA-INFRA-LAB">https://github.com/CBarrosoBRRJ/PD-KAFKA-INFRA-LAB</a></div>
+        <div><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/caio-barroso-ia-datascience">www.linkedin.com/in/caio-barroso-ia-datascience</a></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>1. Descrição do Projeto e Objetivo</h2>
+      <p>
+        O trabalho foi executado em duas frentes complementares. Na parte teórica, foi projetada uma arquitetura para
+        detecção de fraude em transações de cartão em tempo real, contemplando resposta imediata por blacklist,
+        enriquecimento de dados, inferência de suspeita por ML e estratégia de monitoramento sem ponto único de falha.
+      </p>
+      <p>
+        Na parte prática, foi implementado um pipeline distribuído com Apache Kafka (3 brokers), Kafka Connect,
+        Redis, Prometheus e Grafana, com foco no requisito operacional do enunciado: manter no Redis apenas o estado
+        mais recente de cada entregador, sem duplicidade lógica por <code>driver_id</code>.
+      </p>
+      <ul>
+        <li>Mensageria: Kafka com tópico compactado.</li>
+        <li>Integração: Redis Sink Connector no Kafka Connect.</li>
+        <li>Persistência operacional: Redis com chave por entregador.</li>
+        <li>Observabilidade: Prometheus + Grafana.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>2. Parte Teórica - Detecção de Fraude</h2>
+      <p><span class="status ok">Entregue</span></p>
+      <ul>
+        <li>Arquitetura proposta para resposta imediata e trilha de ML.</li>
+        <li>Casos de uso cobrindo transações legítimas, bloqueadas, suspeitas e reversões.</li>
+        <li>Justificativa de tecnologias por camada (streaming, persistência, observabilidade).</li>
+        <li>Estrategia de ML, monitoramento e anti-SPOF documentada.</li>
+      </ul>
+
+      <h3>2.1 Diagrama de Arquitetura</h3>
+      <figure class="figure">
+        <img src="assets/imagens/01_diagrama_arquitetura.png" alt="Diagrama de Arquitetura da Parte Teórica" />
+        <figcaption>Figura 1 - Arquitetura da parte teórica (fraude em tempo real).</figcaption>
+      </figure>
+
+      <h3>2.2 Referências da Parte Teórica</h3>
+      <ul>
+        <li><code>docs/escopo_projeto.md</code></li>
+        <li><code>docs/parte_teorica/02_casos_de_uso.md</code></li>
+        <li><code>docs/parte_teorica/03_tecnologias_justificativas.md</code></li>
+        <li><code>docs/parte_teorica/04_ml_monitoramento_spof.md</code></li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>3. Parte Prática - Pipeline Kafka</h2>
+      <p><span class="status ok">Implementado e validado</span></p>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Item do Enunciado</th>
+              <th>Status</th>
+              <th>Resultado</th>
+              <th>Evidência</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Kafka com 3 brokers</td>
+              <td>OK</td>
+              <td>Cluster ativo e saudável</td>
+              <td>A_01</td>
+            </tr>
+            <tr>
+              <td>Tópico para último estado</td>
+              <td>OK</td>
+              <td><code>driver-location-state</code> com <code>cleanup.policy=compact</code></td>
+              <td>B_01</td>
+            </tr>
+            <tr>
+              <td>Produtor Python com simulador</td>
+              <td>OK</td>
+              <td>Publicacao continua com chave <code>driver_id</code></td>
+              <td>D_01</td>
+            </tr>
+            <tr>
+              <td>Kafka Connect Sink para Redis</td>
+              <td>OK</td>
+              <td>Conector RUNNING com tasks RUNNING</td>
+              <td>C_01</td>
+            </tr>
+            <tr>
+              <td>Estado atual no Redis sem duplicidade</td>
+              <td>OK</td>
+              <td>Chaves <code>driver:location:&lt;driver_id&gt;</code> atualizadas no tempo</td>
+              <td>E_01, E_02, E_03</td>
+            </tr>
+            <tr>
+              <td>Prometheus + Grafana</td>
+              <td>OK</td>
+              <td>Dashboard e targets ativos</td>
+              <td>F_01, F_02</td>
+            </tr>
+            <tr>
+              <td>Resiliência com parada de broker</td>
+              <td>OK</td>
+              <td><code>kafka2</code> parado e recuperado com sucesso</td>
+              <td>G_01, G_02</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4. Evidências Coletadas</h2>
+
+      <h3>4.1 Infraestrutura e Configuracao</h3>
+      <div class="gallery">
+        <figure class="figure">
+          <img src="assets/imagens/A_01_docker_compose_ps.png" alt="Docker compose ps" />
+          <figcaption>A_01 - Servicos do ambiente ativos.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/B_01_topic_describe.png" alt="Tópico describe" />
+          <figcaption>B_01 - Tópico com compactação e replicacao.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/C_01_connector_status.png" alt="Connector status" />
+          <figcaption>C_01 - Conector Redis Sink em RUNNING.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/D_01_produtor_eventos.png" alt="Produtor enviando eventos" />
+          <figcaption>D_01 - Produtor publicando eventos em tempo real.</figcaption>
+        </figure>
+      </div>
+
+      <h3>4.2 Validação de Estado no Redis</h3>
+      <div class="gallery">
+        <figure class="figure">
+          <img src="assets/imagens/E_01_validate_state.png" alt="Validate state" />
+          <figcaption>E_01 - Validação geral do estado no Redis.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/E_02_driver100_before.png" alt="Driver before" />
+          <figcaption>E_02 - Estado inicial do driver_100.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/E_03_driver100_after.png" alt="Driver after" />
+          <figcaption>E_03 - Estado atualizado do driver_100.</figcaption>
+        </figure>
+      </div>
+
+      <h3>4.3 Monitoramento e Resiliência</h3>
+      <div class="gallery">
+        <figure class="figure">
+          <img src="assets/imagens/F_01_grafana_dashboard.png" alt="Grafana" />
+          <figcaption>F_01 - Dashboard Grafana.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/F_02_prometheus_targets.png" alt="Prometheus targets" />
+          <figcaption>F_02 - Targets do Prometheus em UP.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/G_01_broker_down.png" alt="Broker down" />
+          <figcaption>G_01 - Parada controlada do broker kafka2.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/imagens/G_02_broker_up.png" alt="Broker up" />
+          <figcaption>G_02 - Recuperacao do broker kafka2.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. Observação sobre o Vídeo</h2>
+      <p><span class="status warn">Não entregue</span></p>
+      <p>
+        O vídeo explicativo não foi produzido por limitação de infraestrutura local para gravação.
+        Como substituição parcial, foram apresentadas evidências por logs e capturas de tela cobrindo
+        implementacao, validação funcional, monitoramento e resiliencia.
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>6. Conclusão</h2>
+      <ul>
+        <li>Parte prática implementada e validada com sucesso.</li>
+        <li>Parte teórica documentada com escopo, arquitetura, casos de uso, tecnologias e estratégia de ML.</li>
+        <li>Entrega organizada para reprodução local e auditoria técnica de evidências.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>7. Checklist de Entrega x Enunciado</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Parte</th>
+              <th>Item Solicitado</th>
+              <th>Status</th>
+              <th>Evidência</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Teórica</td>
+              <td>Diagrama de arquitetura</td>
+              <td>OK</td>
+              <td>Figura 1 + docs/parte_teorica/imagens/01_diagrama_arquitetura.png</td>
+              <td>Entregue</td>
+            </tr>
+            <tr>
+              <td>Teórica</td>
+              <td>Casos de uso e fluxos</td>
+              <td>OK</td>
+              <td>docs/parte_teorica/02_casos_de_uso.md</td>
+              <td>Entregue</td>
+            </tr>
+            <tr>
+              <td>Teórica</td>
+              <td>Tecnologias e justificativas</td>
+              <td>OK</td>
+              <td>docs/parte_teorica/03_tecnologias_justificativas.md</td>
+              <td>Entregue</td>
+            </tr>
+            <tr>
+              <td>Teórica</td>
+              <td>Estrategia ML + monitoramento + anti-SPOF</td>
+              <td>OK</td>
+              <td>docs/parte_teorica/04_ml_monitoramento_spof.md</td>
+              <td>Entregue</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Kafka com 3 brokers</td>
+              <td>OK</td>
+              <td>A_01</td>
+              <td>Cluster ativo e saudável</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Tópico para último estado (compactação)</td>
+              <td>OK</td>
+              <td>B_01</td>
+              <td>cleanup.policy=compact</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Produtor com schema solicitado</td>
+              <td>OK</td>
+              <td>D_01 + codigo produtor</td>
+              <td>key=driver_id</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Kafka Connect Sink para Redis</td>
+              <td>OK</td>
+              <td>C_01</td>
+              <td>Connector e tasks em RUNNING</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Validação de estado sem duplicidade</td>
+              <td>OK</td>
+              <td>E_01, E_02, E_03</td>
+              <td>Estado atualizado por driver_id</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Monitoramento Prometheus + Grafana</td>
+              <td>OK</td>
+              <td>F_01, F_02</td>
+              <td>Targets e dashboard ativos</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Resiliência com parada de broker</td>
+              <td>OK</td>
+              <td>G_01, G_02</td>
+              <td>Broker parado e recuperado</td>
+            </tr>
+            <tr>
+              <td>Prática</td>
+              <td>Vídeo explicativo</td>
+              <td>NÃO ENTREGUE</td>
+              <td>Substituído por logs + prints</td>
+              <td>Limitação de infraestrutura local para gravação</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer">Relatório técnico acadêmico - Infraestrutura Kafka - Março/2026</p>
+  </main>
+</body>
+</html>
+
+

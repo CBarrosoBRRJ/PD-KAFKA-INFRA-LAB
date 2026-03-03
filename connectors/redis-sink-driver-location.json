@@ -1,0 +1,15 @@
+{
+  "name": "redis-sink-driver-location",
+  "config": {
+    "connector.class": "com.redis.kafka.connect.RedisSinkConnector",
+    "tasks.max": "2",
+    "topics": "driver-location-state",
+    "redis.uri": "redis://redis:6379",
+    "redis.command": "HSET",
+    "redis.key": "driver:location",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "behavior.on.null.values": "ignore"
+  }
+}

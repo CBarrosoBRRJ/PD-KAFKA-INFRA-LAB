@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+
+# local runtime
+connectors/*.jar
+grafana-data/
+prometheus-data/
+
+# private/local docs not intended for public repository
+AGENTS.md
+PROJECT_SPEC.md
+evidencias/
